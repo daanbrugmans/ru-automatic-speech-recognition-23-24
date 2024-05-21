@@ -1,0 +1,1 @@
+- Backdoor the Speaker Identification model using a JingleBack attack during model initialization, then during optimization/usage, provide the pipeline audio with the specific Pedalboard setup used in the JingleBack attack, then measure the decrease in performance (Attack Success Rate).
