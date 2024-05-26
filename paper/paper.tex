@@ -45,7 +45,7 @@
 
 \graphicspath{{./images}}
 
-\title{Attacks on Neural Networks in a Lightweight Speech Anonymization Pipeline}
+\title{(Automatic) Speech Recognition Project --- Attacks on Neural Networks in a Lightweight Speech Anonymization Pipeline}
 
 \author{Daan Brugmans \\
   Radboud University\\
@@ -163,12 +163,32 @@ where $x_{t+1}$ is the final result of one round of PGD.
 PGD can be performed for multiple rounds $T$ until $x_T$ is reached. 
 
 \subsubsection{Backdoor Attacks}
-\citet{gu2019badnets} % The paper about BadNets. Keep it brief. Use it to visualize the backdooring process.
+Backdoor attacks are adversarial attacks that are used during model training.
+They are a subset of \textit{Poisoning Attacks}.
+The aim of a poisoning attack is to alter (a subset of) the training data in order to teach the model certain behavior or to decrease the model's performance.
+Backdoor attacks are a specific type of poisoning attack where the attacker teaches a model to respond to a certain property of the data.
+If the model encounters that property in a data sample, it should behave according to the attacker's goals.
+This property is called a \textit{trigger}.
 
+\begin{figure*}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{badnet.png}
+  \caption{An example of a BadNet attack \citep{gu2019badnets}. On the left, an image of a stop sign with varying BadNet backdoors can be seen. On the right, a backdoored network can be seen interpreting a stop sign as a speed limit sign due to the physical backdoor on the sign itself.}
+  \label{fig:badnet}
+\end{figure*}
+
+A well-known example of a backdoor attack is the BadNet attack by \citet{gu2019badnets}.
+BadNet attacks poison a dataset of images by adding a visual feature onto the image, such as a colored square.
+A Convolutional Neural Network (CNN) will then learn to associate the visual feature with certain behavior.
+If the model has successfully learned to associate the trigger with certain behavior, then it will display that behavior during inference when given an image with the trigger, such as misclassifying an image.
+
+Since backdoor attacks are applied during training, certain attacks can only be used on certain types of data and networks.
+Although backdoor attacks are most often used on image data, there also exist backdoor attacks on audio data.
+\dots % Ga hier door!
 \citet{liu2018trojaning} % The paper about trojanning audio. Keep it brief. Use it to show that backdooring audio is also possible.
-
 \citet{stefanos2022ultrasonic} % The paper about ultrasonic frequencies for backdooring. Keep it brief. Another example of audio backdoor.
 
+% Nieuwe alinea
 \citet{stefanos2023jingleback} % Jingleback paper. Explain in more details since you will focus on it.
 
 \subsection{Attacks on Neural Speech Systems}
