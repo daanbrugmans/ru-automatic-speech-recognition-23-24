@@ -37,6 +37,8 @@
 %
 % and set <dim> to something 5cm or larger.
 
+\usepackage{natbib}
+
 \title{Attacks on Neural Networks in a Lightweight Speech Anonymization Pipeline}
 
 \author{Daan Brugmans \\
@@ -69,9 +71,26 @@ By attacking neural Speaker Anonymization systems, we may be able to circumvent 
 This paper will focus in that topic: attacking neural Speaker Anonymization systems.
 
 \section{Related Work}
-\citet{meyer2023anonymizing}
+\citet{meyer2023anonymizing} % Work on neural speaker anonymization
+
+\citet{shihao2024adversarial} % Work on attacking neural speaker anonymization
+
+\citet{xiaoyong2019adversarial} % Often cited paper about adversarial examples and attacks, use for introducing the idea of attacks on neural networks
+
+\citet{goodfellow2015explaining} % The paper about FGSM, use as intro to evasion attacks
+
+\citet{madry2018towards} % The paper about PGD, which we will use, builds upon FGSM
+
+\citet{gu2019badnets} % The paper about BadNets. Keep it brief. Use it to visualize the backdooring process.
+
+\citet{liu2018trojaning} % The paper about trojanning audio. Keep it brief. Use it to show that backdooring audio is also possible.
+
+\citet{stefanos2022ultrasonic} % The paper about ultrasonic frequencies for backdooring. Keep it brief. Another example of audio backdoor.
+
+\citet{stefanos2023jingleback} % Jingleback paper. Explain in more details since you will focus on it.
 
 \section{Method}
+\citet{kai2022lightweight} % Work on lightweight speaker anonymization, idea for our method/pipeline.
 
 \section{Experiment}
 
