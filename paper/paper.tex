@@ -166,6 +166,13 @@ where $x_{t+1}$ is the final result of one round of PGD.
 PGD can be performed for multiple rounds $T$ until $x_T$ is reached. 
 
 \subsubsection{Backdoor Attacks}
+\begin{figure*}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{badnet.png}
+  \caption{An example of a BadNet attack \citep{gu2019badnets}. On the left, an image of a stop sign with varying BadNet backdoors can be seen. On the right, a backdoored network can be seen interpreting a stop sign as a speed limit sign due to the physical backdoor on the sign itself.}
+  \label{fig:badnet}
+\end{figure*}
+
 Backdoor attacks are adversarial attacks that are used during model training.
 They are a subset of \textit{Poisoning Attacks}.
 The aim of a poisoning attack is to alter (a subset of) the training data in order to teach the model certain behavior or to decrease the model's performance.
@@ -180,23 +187,24 @@ If the model has successfully learned to associate the trigger with certain beha
 The trigger may cause the model to misclassify an image, for example.
 Such an example is showcased in figure \ref{fig:badnet}.
 
-\begin{figure*}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{badnet.png}
-  \caption{An example of a BadNet attack \citep{gu2019badnets}. On the left, an image of a stop sign with varying BadNet backdoors can be seen. On the right, a backdoored network can be seen interpreting a stop sign as a speed limit sign due to the physical backdoor on the sign itself.}
-  \label{fig:badnet}
-\end{figure*}
-
 Since backdoor attacks are applied during model training, certain attacks can only be used on certain types of data and networks.
-Although backdoor attacks are most often used on image data, there also exist backdoor attacks on audio data.
-\dots % Ga hier door!
-\citet{liu2018trojaning} % The paper about trojanning audio. Keep it brief. Use it to show that backdooring audio is also possible.
-\citet{stefanos2022ultrasonic} % The paper about ultrasonic frequencies for backdooring. Keep it brief. Another example of audio backdoor.
+Although backdoor attacks are most common for image data and CNNs, there also exist backdoor attacks on audio data.
+\citet{liu2018trojaning} showcase a variety of backdoor attacks, including a backdoor for ASR models where the trigger is background noise that is introduced to audio.
+The ASR model is trained to associate the background noise with a specific word.
+\citet{stefanos2022ultrasonic} propose a backdoor attack on ASR systems where the trigger is inaudible.
+The trigger is a frequency that exceeds the frequency range that can be heard by a human, which should make the trigger impossible to detect by the human ear.
 
-% Nieuwe alinea
-\citet{stefanos2023jingleback} % Jingleback paper. Explain in more details since you will focus on it.
+In \citet{stefanos2023jingleback}, the authors propose a backdoor based on stylistic triggers called \textit{JingleBack}.
+The trigger in a JingleBack attack is a digital music effect applied on the audio, such as a pitch shift or reverb.
+A neural ASR model learns to associate certain combinations of effects with certain behavior.
+In their work, \citeauthor{stefanos2023jingleback} backdoor neural models of three different architectures (small CNN, large CNN, and LSTM) using six different combinations of digital effects.
+They find that certain combinations of effects are more effective triggers than others, and that additional effects do not necessarily improve the trigger's effectiveness.
+The most effective trigger found by the authors was to increase the audio's amplitude by 12dB, then apply a high-pass ladder filter, and then apply a phaser filter.
+This trigger results in a rate of attack success of up to nearly 95\% when only 0.5\% of the training data is poisoned.
 
 \subsection{Attacks on Neural Speech Systems}
+\citet{chen2022survey} % Survery about adversarial attacks on ASR models
+
 \citet{neekhara2019universal} % Paper about adversarial attacks on ASR systems
 
 \citet{kreuk2018fooling} % Paper about adversarial attacks on E2E speaker verification
