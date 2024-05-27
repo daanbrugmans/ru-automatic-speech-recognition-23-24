@@ -45,7 +45,7 @@
 
 \graphicspath{{./images}}
 
-\title{(Automatic) Speech Recognition Project --- Attacks on Neural Networks in a Lightweight Speech Anonymization Pipeline}
+\title{(Automatic) Speech Recognition Project --- Attacks on Neural Networks in a Lightweight Speech Pseudonymization Pipeline}
 
 \author{Daan Brugmans \\
   Radboud University\\
@@ -114,6 +114,33 @@ Their main contribution is the use of an adversarial attack for anonymization pu
 The perturbations caused by the FGSM attack alter the latent space vector in such a way that it is as far removed from the original speaker's speech characterizations as possible, while still representing the original utterance.
 When the vector is then fed to the VAE's decoder, the decoder is unable to extract features from the perturbed vector that relate to the original speaker's speech characterizations.
 The resulting decoded speech sample is untraceable to the original speaker and thus anonymous.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{kai_etal_pipeline.png}
+  \caption{The lightweight pseudonymization pipeline by \citet{kai2022lightweight} visualized.}
+  \label{fig:kai_etal_pipeline}
+\end{figure}
+
+\citet{kai2022lightweight} showcase a lightweight Speaker Anonymization pipeline.
+Their proposed pipeline pseudonymizes speech by applying voice modifications to the spoken utterances.
+In their pipeline, the authors make use of a neural ASR model alongside an \textit{Automatic Speaker Verification} (ASV) model, which are used for the recognition of words and speakers respectively.
+Instead of optimizing the performance of the ASR and ASV model, the authors attempt to optimize the voice modifications applied to the utterances.
+The optimization is performed by minimizing the \textit{Word Error Rate} (WER) and maximizing the \textit{Equal Error Rate} (EER).
+Figure \ref{fig:kai_etal_pipeline} shows the design of the proposed pipeline.
+
+By refraining from using neural models to anonymize the speech itself, and instead opting to use existing neural models only for evaluation purposes, the pseudonymization of the utterances becomes a relatively cheap operation.
+However, although the method proposed by \citeauthor{kai2022lightweight} is lightweight during inference, it does require that an optimal parameter set for the speech modifications is found first, which is a more resource intensive process.
+It should also be noted that this process produces pseudonymized speech, and not anonymous speech; the original speaker could potentially be recognizable, even if only slightly.
+
+\citet{roddeman2024anonymization} expand upon the work by \citet{kai2022lightweight} by proposing their own lightweight speaker pseudonymization optimization pipeline.
+The authors' aims are to produce a pseudonymization pipeline that is resource efficient, easy to deploy, and optimizes swiftly.
+Their pipeline uses the same optimization strategy used by \citeauthor{kai2022lightweight}: pre-trained ASR and ASV models are used to calculate the WER and EER, which are used to optimize a set of audio modifications for pseudonymization purposes.
+
+The authors performed 300 optimization trials, and evaluated their results on samples of utterances spoken by both men and women.
+They found that the most effective modifications for pseudonymization purposes include a time stretch factor, an increase in dB, and applying a low-pass cutoff.
+However, they also found that the effectiveness of a modification varies by the speaker's gender: while a time stretch factor was effective for both male and female spoken utterances, low-pass cutoffs only seemed effective on female-spoken utterances.
+\citeauthor{roddeman2024anonymization}'s implementation uses Pedalboard \citep{sobot2021pedalboard} for applying the audio modifications and Optuna \citep{akiba2019optuna} for the optimization process.
 
 \subsection{Adversarial Attacks on Neural Networks}
 The FGSM attack used by \citet{shihao2024adversarial} is an example of an adversarial attack.
@@ -199,6 +226,7 @@ In \citet{stefanos2023jingleback}, the authors propose a backdoor based on styli
 The trigger in a JingleBack attack is a digital music effect applied on the audio, such as a pitch shift or reverb.
 A neural ASR model learns to associate certain combinations of effects with certain behavior.
 In their work, \citeauthor{stefanos2023jingleback} backdoor neural models of three different architectures (small CNN, large CNN, and LSTM) using six different combinations of digital effects.
+These effects were applied using Pedalboard \citep{sobot2021pedalboard}.
 They find that certain combinations of effects are more effective triggers than others, and that additional effects do not necessarily improve the trigger's effectiveness.
 The most effective trigger found by the authors was to increase the audio's amplitude by 12dB, then apply a high-pass ladder filter, and then apply a phaser filter.
 This trigger results in a rate of attack success of up to nearly 95\% when only 0.5\% of the training data is poisoned.
@@ -217,9 +245,8 @@ This trigger results in a rate of attack success of up to nearly 95\% when only 
 % \citet{kreuk2018fooling}
 
 \section{Method}
-\citet{kai2022lightweight} % Work on lightweight speaker anonymization, idea for our method/pipeline.
-
 % Praat hier over de pipeline en wat het algemene idee is van je experiment.
+
 
 \section{Experiment}
 % Praat hier over de specifieke aanvallen die je wil doen en de metrics die je gebruikt
