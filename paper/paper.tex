@@ -115,10 +115,11 @@ The perturbations caused by the FGSM attack alter the latent space vector in suc
 When the vector is then fed to the VAE's decoder, the decoder is unable to extract features from the perturbed vector that relate to the original speaker's speech characterizations.
 The resulting decoded speech sample is untraceable to the original speaker and thus anonymous.
 
-\subsection{Attacks on Neural Networks}
+\subsection{Adversarial Attacks on Neural Networks}
 The FGSM attack used by \citet{shihao2024adversarial} is an example of an adversarial attack.
 Adversarial attacks are extensively described by \citet{xiaoyong2019adversarial}.
 They provide an introduction to and an overview of adversarial attacks within the deep learning domain, and should provide the reader with plentiful knowledge on the topic.
+\citet{chen2022survey} provide an overview of adversarial attacks aimed at speech systems, including ASR systems.
 
 For the purposes of this paper, we will limit out attention to two types of adversarial attacks: \textit{Evasion Attacks} and \textit{Backdoor Attacks}.
 
@@ -202,12 +203,18 @@ They find that certain combinations of effects are more effective triggers than 
 The most effective trigger found by the authors was to increase the audio's amplitude by 12dB, then apply a high-pass ladder filter, and then apply a phaser filter.
 This trigger results in a rate of attack success of up to nearly 95\% when only 0.5\% of the training data is poisoned.
 
-\subsection{Attacks on Neural Speech Systems}
-\citet{chen2022survey} % Survery about adversarial attacks on ASR models
+%%%%% Low priority, not needed for understanding the project, so only write if there's time left.
+% \subsection{Adversarial Attacks on Neural Speech Systems}
+% As demonstrated by \citet{liu2018trojaning,stefanos2022ultrasonic,stefanos2023jingleback}, neural ASR systems are shown to be susceptible to backdoor attacks.
+% The range of adversarial attacks aimed at neural speech systems is not limited backdoor attacks, however.
 
-\citet{neekhara2019universal} % Paper about adversarial attacks on ASR systems
-
-\citet{kreuk2018fooling} % Paper about adversarial attacks on E2E speaker verification
+% \citet{carlini2018audio}
+% \citet{alzantot2018didyouhearthat}
+% \citet{carlini2016hiddenvc}
+% \citet{iter2017generating}
+% \citet{vaidya2015cocainenoodles}
+% \citet{neekhara2019universal}
+% \citet{kreuk2018fooling}
 
 \section{Method}
 \citet{kai2022lightweight} % Work on lightweight speaker anonymization, idea for our method/pipeline.
