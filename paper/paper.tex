@@ -42,6 +42,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{csquotes}
 
 \graphicspath{{./images}}
 
@@ -97,6 +98,11 @@ Specifically, we will focus on the topic of adversarial attacks.
 They are performed by applying a perturbation onto the input data with the aim to alter or manipulate the network's behavior.
 These perturbations should meet two criteria as faithfully as possible: they should not be detectable by humans and they should perturb the original input as little as possible.
 
+For this paper, we attempt to answer the following Research Question:
+\begin{displayquote}
+  \textit{How (effectively) can we manipulate a Speaker Anonymization pipeline by adversarially attacking its neural speech systems?}
+\end{displayquote}
+
 \section{Related Work}
 \subsection{Neural Speaker Anonymization}
 \citet{meyer2023anonymizing} showcase a successful realization of neural Speaker Anonymization using GANs.
@@ -133,9 +139,16 @@ By refraining from using neural models to anonymize the speech itself, and inste
 However, although the method proposed by \citeauthor{kai2022lightweight} is lightweight during inference, it does require that an optimal parameter set for the speech modifications is found first, which is a more resource intensive process.
 It should also be noted that this process produces pseudonymized speech, and not anonymous speech; the original speaker could potentially be recognizable, even if only slightly.
 
-\citet{roddeman2024anonymization} expand upon the work by \citet{kai2022lightweight} by proposing their own lightweight speaker pseudonymization optimization pipeline.
+\citet{roddeman2024anonymization} expand upon the work by \citet{kai2022lightweight} by proposing their own lightweight speaker pseudonymization optimization pipeline, shown in figure \ref{fig:roddeman_etal_optimization}.
 The authors' aims are to produce a pseudonymization pipeline that is resource efficient, easy to deploy, and optimizes swiftly.
 Their pipeline uses the same optimization strategy used by \citeauthor{kai2022lightweight}: pre-trained ASR and ASV models are used to calculate the WER and EER, which are used to optimize a set of audio modifications for pseudonymization purposes.
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.9\textwidth]{roddeman_etal_optimization.png}
+  \caption{The optimization process of the lightweight pseudonymization pipeline by \citet{roddeman2024anonymization}.}
+  \label{fig:roddeman_etal_optimization}
+\end{figure*}
 
 The authors performed 300 optimization trials, and evaluated their results on samples of utterances spoken by both men and women.
 They found that the most effective modifications for pseudonymization purposes include a time stretch factor, an increase in dB, and applying a low-pass cutoff.
@@ -245,12 +258,62 @@ This trigger results in a rate of attack success of up to nearly 95\% when only 
 % \citet{kreuk2018fooling}
 
 \section{Method}
-% Praat hier over de pipeline en wat het algemene idee is van je experiment.
+From the perspective of an adversarial attacker, \citet{roddeman2024anonymization}'s pseudonymization pipeline has at least two noticeable points of attack:
+\begin{enumerate}
+  \item The authors use neural ASR and ASV networks to evaluate the pseudonymization strategy. 
+  Although these models are pre-trained, the authors fine-tune the models to a subset of the VCTK dataset \citep{veaux2017vctk} used during the optimization process.
+  Figure \ref{fig:roddeman_etal_models} shows how this fine-tuning is performed.
+  Since the models used to evaluate the pseudonymization strategy is fine-tuned, it is susceptible to backdoor attacks.
+  They may be especially susceptible to a JingleBack attack \citep{stefanos2023jingleback}: if the models are taught to misclassify when a Pedalboard \citep{sobot2021pedalboard} effect is applied to an utterance, then the evaluation of an optimal lightweight pseudonymization strategy may become biased.
+  \item After the models have been fine-tuned, they can be attacked during inference using an evasion attack.
+  Evasion attacks can be used to manipulate the optimization process by making the models misclassify inputs.
+\end{enumerate}
 
+We will test the effect of evasion and backdoor attacks on the pipeline by \citeauthor{roddeman2024anonymization} and to what extent the optimization strategy employed by their pipeline can be exploited.
+We will attempt to poison the fine-tuning dataset of the ASR and ASV models by inserting a backdoor from Pedalboard.
+This backdoor should be an effect that is not already used by \citeauthor{roddeman2024anonymization}.
+They use the following effects in their optimization pipeline:
+\begin{itemize}
+  \item High-pass Filter
+  \item Low-pass Filter
+  \item Time Stretch
+  \item Pitch Shift
+  \item Distortion
+  \item Bitcrush
+  \item Phaser
+  \item Gain in dB
+\end{itemize}
+Notably, this does not include the use of a Ladder Filter, which is employed by \citet{stefanos2023jingleback} in their most effective JingleBack attack.
+We will follow their example and attempt to insert a backdoor into the ASR and ASV models using the Ladder Filter effect as the trigger.
+After fine-tuning, the models will then receive speech utterances with the Ladder Filter effect applied, and should then misclassify the input to a set target class.
+We will also attack the clean versions of the ASR and ASV models during inference.
+We will do this by perturbing utterances using both FGSM and PGD.
+
+We will assess the success of the attacks using varying measures.
+The \textit{Attack Success Rate} (ASR) measures the rate that an attack has successfully led to the desired misclassification.
+The Attack Success Rate is the number of utterances not in the target class that are misclassified as being in the target class, divided by the number of utterances not in the target class.
+For backdoor attacks, we also normally calculate the \textit{Clean Accuracy Drop} (CAD), which is the amount of percentage points the accuracy of the clean model has decreased after it was backdoored.
+However, the performance of the ASR model is not measured using accuracy, but with WER.
+That is why we will measure the decrease in performance for the ASR model using the \textit{Word Error Rate Increase} (WERI).
+The ASV model's performance is assessed using the accuracy metric, so we can use the CAD to measure the decrease in its performance after poisoning the data.
+For reference, the WER of the ASR model and the accuracy of the ASV model are also calculated.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth]{roddeman_etal_models.png}
+  \caption{Fine-tuning of the neural ASR and ASV models in \citet{roddeman2024anonymization}.}
+  \label{fig:roddeman_etal_models}
+\end{figure}
 
 \section{Experiment}
-% Praat hier over de specifieke aanvallen die je wil doen en de metrics die je gebruikt
-% Verwijs hier naar je code
+% Specify the specific settings and individual attacks you performed.
+  % Backdoor attack (JingleBack): poisoning rate, ...
+  % Evasion attack (FGSM and PGD): ...
+
+% Specify the transliteration and speaker you want the models to pick when they get the backdoor.
+
+The code used for the experiments performed can be found at the following URL: \url{https://github.com/daanbrugmans/ru-automatic-speech-recognition-23-24}
 
 \section{Results}
 
