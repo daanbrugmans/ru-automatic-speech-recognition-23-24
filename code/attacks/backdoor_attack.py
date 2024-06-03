@@ -11,5 +11,5 @@ class BackdoorAttack(ABC):
         self.target_label: int
     
     @abstractmethod
-    def execute(self, image: torch.Tensor):
+    def execute(self, utterance: torch.Tensor, sample_rate: float):
         raise NotImplementedError("The BackdoorAttack base class is abstract. Please use an implementation of an Attack.")

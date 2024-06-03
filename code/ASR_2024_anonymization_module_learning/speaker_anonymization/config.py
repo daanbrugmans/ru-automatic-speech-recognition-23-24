@@ -39,9 +39,10 @@ class Config:
     IMAGES_DIR = "code/ASR-2024-anonymization-module-learning/images"
     CACHE_FOLDER = "d:/Datasets/vctk/cache"#"cache"
     ANONYMIZED_FOLDER = "d:/Datasets/vctk/anonymized_audio"
+    BACKDOORED_FOLDER = "d:/Datasets/vctk/backdoored_audio"
     SHOW_PROGRESS_BAR = False
     CONFIG_N_JOBS = 1  # Number of jobs to run in parallel, -1 means use all
-    SEED = 42
+    SEED = 3131
 
     # ASR CONFIG
     ASR_BACKBONE = "Somebody433/fine-tuned-vctkdataset"
