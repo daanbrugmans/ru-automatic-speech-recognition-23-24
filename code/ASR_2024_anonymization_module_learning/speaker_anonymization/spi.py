@@ -8,10 +8,10 @@ from torch import nn
 from tqdm import tqdm
 from transformers import Wav2Vec2Model, Wav2Vec2Processor
 
-from speaker_anonymization.config import Config
-from speaker_anonymization.data import get_audio_data_wavs
-from speaker_anonymization.losses import speaker_verification_loss
-from speaker_anonymization.utils import load_audio
+from ASR_2024_anonymization_module_learning.speaker_anonymization.config import Config
+from ASR_2024_anonymization_module_learning.speaker_anonymization.data import get_audio_data_wavs
+from ASR_2024_anonymization_module_learning.speaker_anonymization.losses import speaker_verification_loss
+from ASR_2024_anonymization_module_learning.speaker_anonymization.utils import load_audio
 
 if torch.backends.mps.is_available() and torch.backends.mps.is_built():
     device = torch.device("mps")
@@ -43,19 +43,20 @@ class SpeakerIdentificationModel:
         logits = self.classifier(embeddings)
         return logits
 
-    def finetune_model(self, speaker_labels, files, n_epochs=10, learning_rate=1e-2):
-        try:
-            cached_model = torch.load(
-                f"code/ASR-2024-anonymization-module-learning/checkpoints/{self.study_name}/speaker_verification_model_{self.num_speakers}_{n_epochs}_{learning_rate}.pt"
-            )
-        except FileNotFoundError:
-            cached_model = None
-        if cached_model:
-            self.classifier.load_state_dict(cached_model)
-            print(
-                f"Loaded cached model for {self.num_speakers} speakers and {n_epochs} epochs."
-            )
-            return
+    def finetune_model(self, speaker_labels, files, n_epochs=10, learning_rate=1e-2, try_cached_model: bool = True):
+        if try_cached_model:
+            try:
+                cached_model = torch.load(
+                    f"d:/Models/ASR_2024_anonymization_module_learning/{self.study_name}/speaker_verification_model_{self.num_speakers}_{n_epochs}_{learning_rate}.pt"
+                )
+            except FileNotFoundError:
+                cached_model = None
+            if cached_model:
+                self.classifier.load_state_dict(cached_model)
+                print(
+                    f"Loaded cached model for {self.num_speakers} speakers and {n_epochs} epochs."
+                )
+                return
         self.model.train()
         optimizer = torch.optim.Adam(self.classifier.parameters(), lr=learning_rate)
         criterion = nn.CrossEntropyLoss()
@@ -82,7 +83,7 @@ class SpeakerIdentificationModel:
             mean_loss_per_epoch.append(np.mean(losses))
             print("Mean loss:", np.mean(losses))
 
-        local_dir = f"code/ASR-2024-anonymization-module-learning/checkpoints/{self.study_name}"
+        local_dir = f"d:/Models/ASR_2024_anonymization_module_learning/{self.study_name}"
         os.makedirs(local_dir, exist_ok=True)
         torch.save(
             self.classifier.state_dict(),

@@ -1,4 +1,4 @@
-from attacks.abstract_backdoor_attack import AbstractBackdoorAttack
+from attacks.backdoor_attack import BackdoorAttack
 from backdoored_dataset import get_dataloaders
 
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ import torch
 from torch import nn
 
 class NeuralModel:
-    def __init__(self, device, epochs: int = 30, attack: AbstractBackdoorAttack = None) -> None:
+    def __init__(self, device, epochs: int = 30, attack: BackdoorAttack = None) -> None:
         self.neural_network = ....to(device)
         self.loss_function = ...
         self.optimizer = torch.optim.AdamW(self.neural_network.parameters(), lr=0.001)

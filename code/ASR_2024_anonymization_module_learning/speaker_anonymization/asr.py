@@ -3,9 +3,9 @@ import logging
 import torch
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
-from speaker_anonymization.data import get_audio_data_wavs
-from speaker_anonymization.losses import average_wer, normalized_wer
-from speaker_anonymization.utils import load_audio
+from ASR_2024_anonymization_module_learning.speaker_anonymization.data import get_audio_data_wavs
+from ASR_2024_anonymization_module_learning.speaker_anonymization.losses import average_wer, normalized_wer
+from ASR_2024_anonymization_module_learning.speaker_anonymization.utils import load_audio
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import torch
 
 
-class AbstractBackdoorAttack(ABC):
+class BackdoorAttack(ABC):
     def __init__(self) -> None:
         self.attack_name: str
         

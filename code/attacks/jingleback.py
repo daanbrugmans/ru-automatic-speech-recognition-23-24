@@ -1,9 +1,9 @@
-from attacks.abstract_backdoor_attack import AbstractBackdoorAttack
+from attacks.backdoor_attack import BackdoorAttack
 
 import pedalboard
 import torch
 
-class Jingleback(AbstractBackdoorAttack):
+class JingleBack(BackdoorAttack):
     def __init__(self, source_label = int, target_label = int) -> None:
         self.attack_name = "Jingleback Attack"
         

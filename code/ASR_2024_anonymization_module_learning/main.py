@@ -1,7 +1,7 @@
 from multiprocessing import Pool, cpu_count
 
-from speaker_anonymization.config import Config
-from speaker_anonymization.optimize import optimize_audio_effects
+from ASR_2024_anonymization_module_learning.speaker_anonymization.config import Config
+from ASR_2024_anonymization_module_learning.speaker_anonymization.optimize import optimize_audio_effects
 
 
 def run_optimization(config):

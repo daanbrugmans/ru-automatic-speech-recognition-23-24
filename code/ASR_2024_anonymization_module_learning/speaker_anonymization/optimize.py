@@ -16,15 +16,15 @@ from pedalboard import (
     time_stretch,
 )
 
-from speaker_anonymization.asr import (
+from ASR_2024_anonymization_module_learning.speaker_anonymization.asr import (
     load_audio,
     load_pretrained_model,
     transcribe_audio,
 )
-from speaker_anonymization.data import get_audio_data_wavs
-from speaker_anonymization.losses import calculate_combined_loss
-from speaker_anonymization.spi import SpeakerIdentificationModel
-from speaker_anonymization.utils import save_audio_file, save_optimization_plots
+from ASR_2024_anonymization_module_learning.speaker_anonymization.data import get_audio_data_wavs
+from ASR_2024_anonymization_module_learning.speaker_anonymization.losses import calculate_combined_loss
+from ASR_2024_anonymization_module_learning.speaker_anonymization.spi import SpeakerIdentificationModel
+from ASR_2024_anonymization_module_learning.speaker_anonymization.utils import save_audio_file, save_optimization_plots
 
 
 def optimize_audio_effects(CONFIG):
