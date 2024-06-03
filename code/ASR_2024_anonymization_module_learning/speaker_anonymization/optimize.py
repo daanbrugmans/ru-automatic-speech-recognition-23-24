@@ -29,7 +29,7 @@ from ASR_2024_anonymization_module_learning.speaker_anonymization.utils import s
 from backdoored_dataset import BackdooredVCTK
 
 
-def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
+def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None, stop_after_model_evaluation: bool = False):
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
@@ -58,7 +58,7 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
 
     logging.info("Finetuning Speaker Identification model...\n")
     speaker_identification.finetune_model(
-        speakers, file_paths, n_epochs=CONFIG.SPEAKER_IDENTIFICATION_EPOCHS
+        speakers, file_paths, n_epochs=CONFIG.SPEAKER_IDENTIFICATION_EPOCHS, try_cached_model=False
     )
     logging.info("Speaker Identification model trained.\n\n")
 
@@ -70,6 +70,9 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
     _, _, avg_wer, accuracy, combined_loss = evaluate_asr_and_asv(
         initial_audio_data, transcriptions, speakers, processor, asr_model, speaker_identification, CONFIG
     )
+    
+    if stop_after_model_evaluation:
+        return processor, asr_model, speaker_identification, avg_wer, accuracy, combined_loss
 
     logging.info(f"Starting audio parameter optimization...\n")
     study = optuna.create_study(
@@ -79,7 +82,7 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
         load_if_exists=CONFIG.LOAD_IF_EXISTS,
     )
     study.optimize(
-        lambda trial: optimize_params(trial, file_paths, transcriptions, speakers, CONFIG),
+        lambda trial: optimize_params(trial, file_paths, transcriptions, speakers, processor, asr_model, speaker_identification, CONFIG),
         n_trials=CONFIG.NUM_TRIALS,
         show_progress_bar=CONFIG.SHOW_PROGRESS_BAR,
         n_jobs=CONFIG.CONFIG_N_JOBS,
@@ -90,7 +93,7 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
 
     logging.info("Saving optimization plots...\n")
     images_dir = (
-        f"code/ASR-2024-anonymization-module-learning/images/{study.study_name}_{str(num_speakers)}_speakers_{study.best_value:.2f}"
+        f"ASR_2024_anonymization_module_learning/images/{study.study_name}_{str(num_speakers)}_speakers_{study.best_value:.2f}"
     )
     os.makedirs(images_dir, exist_ok=True)
 
@@ -111,6 +114,8 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None):
         save_audio_file(processed_audio, path, sample_rate)
 
     print(f"All anonymized audio files stored in: {anon_folder}")
+    
+    return processor, asr_model, speaker_identification, avg_wer, accuracy, combined_loss
 
 
 def apply_audio_effects(audio, sample_rate, params):
@@ -169,7 +174,7 @@ def evaluate_asr_and_asv(audio_data, transcriptions, speakers, asr_processor, as
     return predictions, predicted_speakers, avg_wer, accuracy, combined_loss
 
 
-def optimize_params(trial, file_paths, transcriptions, speakers, CONFIG):
+def optimize_params(trial, file_paths, transcriptions, speakers, asr_processor, asr_model, asv_model, CONFIG):
     """Define and apply hyperparameter optimization using normal distribution for parameters."""
     params = {
         "distortion_drive_db": trial.suggest_float(
@@ -241,7 +246,7 @@ def optimize_params(trial, file_paths, transcriptions, speakers, CONFIG):
         audio_data.append((processed_audio, sr))
 
     _, _, avg_wer, accuracy, combined_loss = evaluate_asr_and_asv(
-        audio_data, transcriptions, speakers
+        audio_data, transcriptions, speakers, asr_processor, asr_model, asv_model, CONFIG
     )
 
     trial.set_user_attr("avg_wer", avg_wer)

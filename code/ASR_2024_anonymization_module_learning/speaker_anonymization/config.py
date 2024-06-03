@@ -1,5 +1,3 @@
-import os
-
 class Config:
     def __init__(
         self,
@@ -34,9 +32,9 @@ class Config:
             self.STUDY_NAME += f"_region-{self.REGION}"
 
     # General
-    STORAGE_NAME = f"code/ASR-2024-anonymization-module-learning/sqlite:///optimize_audio_effects_for_anonymization.db"
+    STORAGE_NAME = f"sqlite:///ASR_2024_anonymization_module_learning/optimize_audio_effects_for_anonymization.db"
     LOAD_IF_EXISTS = True
-    IMAGES_DIR = "code/ASR-2024-anonymization-module-learning/images"
+    IMAGES_DIR = "ASR_2024_anonymization_module_learning/images"
     CACHE_FOLDER = "d:/Datasets/vctk/cache"#"cache"
     ANONYMIZED_FOLDER = "d:/Datasets/vctk/anonymized_audio"
     BACKDOORED_FOLDER = "d:/Datasets/vctk/backdoored_audio"

@@ -102,7 +102,7 @@ class SpeakerIdentificationModel:
         plt.grid(True)
         plt.tight_layout()
 
-        images_dir = f"code/ASR-2024-anonymization-module-learning/images/{self.study_name}/speaker_verification_training_{num_epochs}_{num_speakers}_{learning_rate}"
+        images_dir = f"ASR_2024_anonymization_module_learning/images/{self.study_name}/speaker_verification_training_{num_epochs}_{num_speakers}_{learning_rate}"
         os.makedirs(images_dir, exist_ok=True)
         plot_path = f"{images_dir}/mean_losses_per_epoch.png"
         plt.savefig(plot_path)

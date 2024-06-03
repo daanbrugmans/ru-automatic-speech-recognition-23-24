@@ -1,10 +1,9 @@
-from neural_model import NeuralModel
-
 from copy import copy
 
 from tqdm import tqdm
 
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 
 def _count_non_source_misclassifications(targets: torch.Tensor, predictions: torch.Tensor, source_label, target_label):
@@ -62,7 +61,7 @@ def _count_source_specific_classifications(targets: torch.Tensor, predictions: t
     
     return sub_correct, sub_total
 
-def attack_success_rate(model: NeuralModel, adversarial_test_dataloader: DataLoader, device, target_label: int, source_label: int = None, verbose: bool = False) -> float:
+def attack_success_rate(model: nn.Module, adversarial_test_dataloader: DataLoader, device, target_label: int, source_label: int = None, verbose: bool = False) -> float:
     """Calculates and returns the Attack Success Rate.
     
     Taken from the Security & Privacy of Machine Learning course (dr. Picek) and refactored."""
@@ -76,12 +75,12 @@ def attack_success_rate(model: NeuralModel, adversarial_test_dataloader: DataLoa
     misclassification_dict = {}
 
     with torch.no_grad():
-        model.neural_network.eval()
+        model.eval()
 
         for images, targets in tqdm(adversarial_test_dataloader):
             # Use poisoned test image to get predictions of backdoored model
             images = images.to(device)
-            outputs = model.neural_network(images).detach()
+            outputs = model(images).detach()
             _, predictions = torch.max(outputs, dim=1)
             
             # If source agnostic attack
@@ -139,7 +138,7 @@ def attack_success_rate(model: NeuralModel, adversarial_test_dataloader: DataLoa
         
     return attack_success_rate
 
-def clean_accuracy_drop(clean_model: NeuralModel, adversarial_model: NeuralModel) -> float:
+def clean_accuracy_drop(clean_model: nn.Module, adversarial_model: nn.Module) -> float:
     """Calculates and returns the Clean Accuracy Drop between a clean and adversarial model."""
     
     original_test_data_adversarial_model = copy(adversarial_model.test_data)
