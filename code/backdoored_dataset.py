@@ -18,7 +18,6 @@ class BackdooredVCTK(Dataset):
             self.poisoning_rate = poisoning_rate
             self.pipeline_config = pipeline_config
                         
-            # self.clean_dataset = datasets.load.load_dataset("vctk", split="train" if train else "test", cache_dir="d:/Datasets/vctk/cache")
             self.clean_dataset = CachedVCTK(pipeline_config)
             self.clean_dataloader = DataLoader(self.clean_dataset, batch_size=1, shuffle=True)
             
