@@ -307,12 +307,6 @@ For reference, the WER of the ASR model and the accuracy of the ASV model are al
 \end{figure}
 
 \section{Experiment}
-% Specify the specific settings and individual attacks you performed.
-  % Backdoor attack (JingleBack): poisoning rate, ...
-  % Evasion attack (FGSM and PGD): ...
-
-% Specify the transliteration and speaker you want the models to pick when they get the backdoor.
-
 The code used for the experiments performed can be found at the following URL: \url{https://github.com/daanbrugmans/ru-automatic-speech-recognition-23-24}.
 
 \subsection{Backdoor Attacks}
@@ -346,6 +340,12 @@ For every poisoning rate, we also calculate the Word Error Rate and Word Error R
 \citet{kim2020torchattacks}
 
 \section{Results}
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.9\textwidth]{backdoor_metrics.png}
+    \caption{An overview of the measured metrics for the JingleBack attack. Per poisoning rate, the Word Error Rate (WER), Word Error Rate Increase (WERI), Speaker Identification Accuracy (Acc), Attack Success Rate (ASR), and Clean Accuracy Drop (CAD) are given.}
+    \label{fig:backdoor_metrics}
+\end{figure*}
 
 \section{Discussion}
 
