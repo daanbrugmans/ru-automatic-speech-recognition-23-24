@@ -340,6 +340,7 @@ For every poisoning rate, we also calculate the Word Error Rate and Word Error R
 \citet{kim2020torchattacks}
 
 \section{Results}
+\subsection{Backdoor Attacks}
 \begin{figure*}
     \centering
     \includegraphics[width=0.9\textwidth]{backdoor_metrics.png}
@@ -347,12 +348,33 @@ For every poisoning rate, we also calculate the Word Error Rate and Word Error R
     \label{fig:backdoor_metrics}
 \end{figure*}
 
+
+
 \section{Discussion}
 
 \section{Conclusion}
 
 \bibliography{custom}
 
+\onecolumn
 \appendix
+
+\section{Additional Results}
+\begin{table*}[h]
+  \centering
+  \begin{tabular}{c|c|c|c|c|c}
+      \textbf{Poisoning Rate} & \textbf{WER} & \textbf{WERI} & \textbf{Acc} & \textbf{CAD} & \textbf{ASR} \\
+      \hline 
+      \textbf{0.00} & 0.104 & - & 0.62 & - & 0.18 \\
+      \textbf{0.05} & 0.106 & 0.0028 & 0.90 & -0.22 & 0.95 \\
+      \textbf{0.10} & 0.100 & -0.0042 & 0.65 & 0.03 & 0.92 \\
+      \textbf{0.20} & 0.100 & -0.0038 & 0.82 & -0.08 & 0.98 \\
+      \textbf{0.30} & 0.106 & 0.0014 & 0.88 & -0.11 & 0.99 \\
+      \textbf{0.40} & 0.107 & 0.0032 & 0.85 & -0.03 & 0.98 \\
+      \textbf{0.50} & 0.103 & -0.0009 & 0.93 & 0.04 & 1.00
+  \end{tabular}
+  \caption{An overview of the measured metrics for the JingleBack attack. Per poisoning rate, the Word Error Rate (WER), Word Error Rate Increase (WERI), Speaker Identification Accuracy (Acc), Attack Success Rate (ASR), and Clean Accuracy Drop (CAD) are given.}
+  \label{tab:backdoor_metrics}
+\end{table*}
 
 \end{document}
