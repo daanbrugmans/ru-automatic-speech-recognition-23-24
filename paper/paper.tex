@@ -269,7 +269,7 @@ From the perspective of an adversarial attacker, \citet{roddeman2024anonymizatio
   Evasion attacks can be used to generate perturbed audio that will be misclassified by the models.
 \end{enumerate}
 
-We will test the effect of evasion and backdoor attacks on the pipeline by \citeauthor{roddeman2024anonymization} and to what extent the optimization strategy employed by their pipeline can be exploited.
+We will test the effect of evasion and backdoor attacks on the pipeline by \citeauthor{roddeman2024anonymization} and to what extent the neural models used for their optimization strategy can be exploited.
 We will attempt to poison the fine-tuning dataset of the ASV model by inserting a backdoor from Pedalboard.
 This backdoor should be an effect that is not already used by \citeauthor{roddeman2024anonymization}.
 They use the following effects in their optimization pipeline:
@@ -292,12 +292,12 @@ We will do this by perturbing utterances using both FGSM and PGD.
 We will assess the success of the attacks using varying measures.
 The \textit{Attack Success Rate} (ASR) measures the rate that an attack has successfully led to the desired misclassification.
 The Attack Success Rate is the number of utterances not in the target class that are misclassified as being in the target class, divided by the number of utterances not in the target class.
-For backdoor attacks, we also usually calculate the \textit{Clean Accuracy Drop} (CAD), which is the amount of percentage points the accuracy of the clean model has decreased after it was backdoored.
-% However, the performance of the ASR model is not measured using accuracy, but with WER.
-% That is why we will measure the decrease in performance for the ASR model using the \textit{Clean Word Error Rate Increase} (CWERI).
-The ASV model's performance is assessed using the accuracy metric, so we can use the CAD to measure the decrease in its performance after poisoning the data.
+We will use the Attack Success Rate to measure the effectiveness of the trigger in the backdoored ASV model.
+We also calculate the \textit{Clean Accuracy Drop} (CAD) of the backdoored ASV model, which is the number of percentage points the accuracy of the clean model has dropped after it was backdoored.
+We will also measure how the performance of the ASR model changes when it receives audio with the backdoor, despite not being backdoored itself.
+However, the performance of the ASR model is not measured using accuracy, but with WER.
+That is why we will measure the decrease in performance for the ASR model using the \textit{Word Error Rate Increase} (WERI).
 For reference, the WER of the ASR model and the accuracy of the ASV model are also calculated.
-
 
 \begin{figure}
   \centering
@@ -315,6 +315,34 @@ For reference, the WER of the ASR model and the accuracy of the ASV model are al
 
 The code used for the experiments performed can be found at the following URL: \url{https://github.com/daanbrugmans/ru-automatic-speech-recognition-23-24}.
 
+\subsection{Backdoor Attacks}
+We backdoor the pre-trained ASV model using a JingleBack attack.
+This JingleBack attack poisons a dataset of VCTK audio files with a Ladder Filter.
+We set up a clean (not poisoned) and an adversarial (poisoned) test dataset of the utterances.
+Both test datasets contain 100 spoken utterances from 10 different speakers, totalling 1000 utterances overall.
+All utterances in the adversarial test dataset are poisoned (a \textit{poisoning rate} of 100\%), because we use this test set to measure the Attack Success Rate.
+We also define a multitude of poisoned train datasets.
+Every poisoned train set contains the exact same utterances: 10 spoken utterances that are not included in the test set, for every speaker in the test set, for a total of 100 utterances.
+Every poisoned train set has a different poisoning rate, however, so that we can measure how the effectiveness of a trigger changes as more training data has the trigger inserted into it.
+
+The ten speakers in the datasets all have a unique ID from 0 through 9.
+We set the target class of the backdoored utterances to 0.
+This means that, from the attacker's perspective, the goal is for the ASV model to learn that a Ladder Filter correlates with the speaker with ID 0.
+
+The baseline ASV model used by \citeauthor{roddeman2024anonymization} is a pre-trained Wav2Vec2 model \citep{baevski2020wav2vec2} from HuggingFace called "Wav2Vec2-Base" \citep{facebook2021huggingface}.
+We first fine-tune an instance of this pre-trained model on a clean train dataset (with no poisoned utterances).
+This model is called the clean model.
+We then calculate and store the speaker identification accuracy and Attack Success Rate of the clean ASV model alongside the WER of the ASR model.
+
+After the clean model has been fine-tuned, we fine-tune a multitude of adversarial models.
+Every adversarial model is trained on a backdoored version of the train dataset with a different poisoning rate.
+We use poisoning rates of 5\%, 10\%, 20\%, 30\%, 40\%, and 50\%.
+In other words, we fine-tune adversarial models to 100 utterances, of which 5, 10, 20, 30, 40, or 50 are backdoored with a JingleBack trigger.
+This results in six backdoored ASV models.
+For every backdoored model, we calculate the speaker identification accuracy, the Attack Success Rate, and the Clean Accuracy Drop.
+For every poisoning rate, we also calculate the Word Error Rate and Word Error Rate Increase of the clean ASR model.
+
+\subsection{Evasion Attacks}
 \citet{kim2020torchattacks}
 
 \section{Results}

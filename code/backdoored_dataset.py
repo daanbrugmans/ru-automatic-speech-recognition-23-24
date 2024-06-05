@@ -37,7 +37,7 @@ class BackdooredVCTK(Dataset):
             return self.backdoored_dataset[index]
         
         def _backdoor_train(self):
-            for index, (utterance, speaker_id, transcription, sample_rate) in enumerate(self.clean_dataloader):
+            for index, (utterance, speaker_id, transcription, sample_rate, _) in enumerate(self.clean_dataloader):
                 speaker_id = speaker_id.item()
                 
                 # If the utterance belongs to the subset of audio we want to backdoor
@@ -59,7 +59,7 @@ class BackdooredVCTK(Dataset):
                     self.backdoored_dataset.append((utterance, speaker_id, transcription, sample_rate, utterance_file_path))
         
         def _backdoor_test(self):
-            for index, (utterance, speaker_id, transcription, sample_rate) in enumerate(self.clean_dataloader):
+            for index, (utterance, speaker_id, transcription, sample_rate, _) in enumerate(self.clean_dataloader):
                 speaker_id = speaker_id.item()
                 backdoored_utterance = self.backdoor.execute(utterance, sample_rate)
                 
@@ -74,11 +74,11 @@ class CachedVCTK(Dataset):
     def __init__(self, pipeline_config: Config) -> None:
         super().__init__()
         
-        file_paths, self.transcriptions, self.speaker_ids = ASR_2024_anonymization_module_learning.speaker_anonymization.data.get_audio_data_wavs(pipeline_config)
-        
+        self.file_paths, self.transcriptions, self.speaker_ids = ASR_2024_anonymization_module_learning.speaker_anonymization.data.get_audio_data_wavs(pipeline_config)
+
         self.utterances = []
         self.sample_rates = []
-        for file_path in file_paths:
+        for file_path in self.file_paths:
             utterance, sample_rate = ASR_2024_anonymization_module_learning.speaker_anonymization.utils.load_audio(file_path)
             self.utterances.append(utterance)
             self.sample_rates.append(sample_rate)
@@ -87,7 +87,7 @@ class CachedVCTK(Dataset):
         return len(self.utterances)
     
     def __getitem__(self, index):
-        return (self.utterances[index], self.speaker_ids[index], self.transcriptions[index], self.sample_rates[index])
+        return (self.utterances[index], self.speaker_ids[index], self.transcriptions[index], self.sample_rates[index], self.file_paths[index])
     
                 
 def get_dataloaders(backdoor: BackdoorAttack = None, train_split=0.8) -> tuple[DataLoader, DataLoader, DataLoader]:

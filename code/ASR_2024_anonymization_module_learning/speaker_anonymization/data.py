@@ -42,12 +42,12 @@ def get_audio_data_wavs(CONFIG):
         with open(cache_file, "rb") as f:
             return pickle.load(f)
 
-    dataset_path = "d:/Datasets/vctk"#os.path.join("data", "vctk")
+    dataset_path = "d:/Datasets/vctk"
     os.makedirs(dataset_path, exist_ok=True)
 
     logging.info("Downloading dataset...")
     dataset = load_dataset(
-        "vctk", split="train", cache_dir=CONFIG.CACHE_FOLDER#, trust_remote_code=True
+        "vctk", split="train", cache_dir=CONFIG.CACHE_FOLDER
     )
 
     filters = {
@@ -70,8 +70,12 @@ def get_audio_data_wavs(CONFIG):
     logging.info("Picking speakers...")
     speaker_ids = set(dataset["speaker_id"])
     logging.info(f"Total speakers: {len(speaker_ids)}")
-    speaker_ids = random.sample(sorted(speaker_ids), n_speakers)
-    logging.info(f"Selected {len(speaker_ids)} speakers for anonymization.\n")
+    # speaker_ids = random.sample(sorted(speaker_ids), n_speakers)
+    speaker_ids = sorted(speaker_ids)[:n_speakers]
+    logging.info(f"Selected {len(speaker_ids)} speakers for anonymization. They are:\n")
+    for speaker_id in speaker_ids:
+        logging.info(f"{speaker_id}")
+    
     # select target_speaker_samples from each speaker
     logging.debug(f"Selecting samples...")
     selected_data = []

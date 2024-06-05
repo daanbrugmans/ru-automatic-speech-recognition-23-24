@@ -17,6 +17,12 @@ def normalized_wer(actual, predicted):
             jiwer.ReduceToListOfListOfWords(word_delimiter=" "),
         ]
     )
+    
+    if type(actual) == tuple:
+        actual = actual[0]
+        
+    if type(predicted) == tuple:
+        predicted = predicted[0]
 
     if not actual.strip() or not predicted.strip():
         return 1.0

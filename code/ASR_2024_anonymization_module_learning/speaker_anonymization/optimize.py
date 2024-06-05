@@ -45,7 +45,15 @@ def optimize_audio_effects(CONFIG, backdoored_vctk: BackdooredVCTK = None, stop_
             CONFIG,
         )
     else:
-        _, speakers, transcriptions, _, file_paths = backdoored_vctk[:]
+        file_paths = []
+        transcriptions = []
+        speakers = []
+        
+        for _, speaker, transcription, _, file_path in backdoored_vctk[:]:
+            file_paths.append(file_path)
+            transcriptions.append(transcription)
+            speakers.append(speaker)
+        
     num_speakers = len(set(speakers))
 
     logging.info("Loading ASR model...\n")
