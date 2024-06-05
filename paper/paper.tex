@@ -312,9 +312,10 @@ The code used for the experiments performed can be found at the following URL: \
 \subsection{Backdoor Attacks}
 We backdoor the pre-trained ASV model using a JingleBack attack.
 This JingleBack attack poisons a dataset of VCTK audio files with a Ladder Filter.
-We set up a clean (not poisoned) and an adversarial (poisoned) test dataset of the utterances.
-Both test datasets contain 100 spoken utterances from 10 different speakers, totalling 1000 utterances overall.
-All utterances in the adversarial test dataset are poisoned (a \textit{poisoning rate} of 100\%), because we use this test set to measure the Attack Success Rate.
+We setup a clean (not poisoned) and an adversarial (poisoned) test dataset of the utterances.
+Both test datasets contain the same 100 spoken utterances from 10 different speakers, totalling 1000 utterances overall.
+All utterances in the adversarial test dataset are poisoned (a \textit{poisoning rate} of 100\%).
+We use the adversarial test set to measure the Attack Success Rate.
 We also define a multitude of poisoned train datasets.
 Every poisoned train set contains the exact same utterances: 10 spoken utterances that are not included in the test set, for every speaker in the test set, for a total of 100 utterances.
 Every poisoned train set has a different poisoning rate, however, so that we can measure how the effectiveness of a trigger changes as more training data has the trigger inserted into it.
@@ -326,7 +327,7 @@ This means that, from the attacker's perspective, the goal is for the ASV model 
 The baseline ASV model used by \citeauthor{roddeman2024anonymization} is a pre-trained Wav2Vec2 model \citep{baevski2020wav2vec2} from HuggingFace called "Wav2Vec2-Base" \citep{facebook2021huggingface}.
 We first fine-tune an instance of this pre-trained model on a clean train dataset (with no poisoned utterances).
 This model is called the clean model.
-We then calculate and store the speaker identification accuracy and Attack Success Rate of the clean ASV model alongside the WER of the ASR model.
+We then calculate and store the speaker identification accuracy and Attack Success Rate of the clean ASV model, alongside the WER of the ASR model on the clean test data.
 
 After the clean model has been fine-tuned, we fine-tune a multitude of adversarial models.
 Every adversarial model is trained on a backdoored version of the train dataset with a different poisoning rate.
@@ -348,9 +349,32 @@ For every poisoning rate, we also calculate the Word Error Rate and Word Error R
     \label{fig:backdoor_metrics}
 \end{figure*}
 
+The results of the JingleBack attack experiment are shown in figure \ref{fig:backdoor_metrics}.
+At an increasing poisoning rate, the clean ASR model's Word Error Rate (WER) and Word Error Rate Increase (WERI) are shown, in addition to a backdoored ASV model's Speaker Identification Accuracy (Acc), Clean Accuracy Drop (CAD), and Attack Success Rate (ASR).
+A table of the exact values can be found in the appendices in table \ref{tab:backdoor_metrics}.
+
+The figure shows that the Attack Success Rate of an ASV model spikes remarkably once it is backdoored in any capacity: while a clean ASV model's Attack Success Rate is just 18\%, a backdoored ASV model with a 5\% poisoning rate reaches an Attack Success Rate of 95\%.
+In other words, after being given merely 5 speech utterances with a Ladder Filter effect as a trigger, the pre-trained ASV model has learned to classify roughly 950 out of 1000 test utterances with a Ladder Filter applied as being spoken by the speaker with ID 0.
+Furthermore, the Attack Success Rate continues to increase as the poisoning rate increases, reaching 98\% with a poisoning rate of 20\%, and a perfect 100\% effectiveness with a poisoning rate of 50\%.
+This means that 50 examples of speech utterances with a Ladder Filter trigger is enough for the pre-trained Wav2Vec2 model to learn the backdoor perfectly.
+
+The results show that, despite learning the backdoor near-perfectly, the accuracy of the ASV model remains stable.
+With the exception of two outliers, speaker identification accuracy of the ASV model lies in the range of [0.82, 0.93].
+The results also show a near-constant Word Error Rate, which is in the range of [0.100, 0.107] at any poisoning rate.
 
 
 \section{Discussion}
+The results show that a simple JingleBack backdoor can successfully be inserted into \citeauthor{roddeman2024anonymization}'s ASV model using only 5 backdoored speech utterances, and that this number of backdoored utterances is sufficient in making the model misclassify 95\% of all utterances with the JingleBack trigger inserted.
+The accuracy of the ASV model is not compromised as this backdoor is learned, with the ASV model being able to identify at least 80\% of all speakers correctly when given an utterance without the trigger, which is a higher accuracy than the clean ASV model.
+This combination of a good accuracy and near-perfect Attack Success Rate should fulfill the wishes of an attacker, who aims to exploit model behavior using the trigger, and wants the model to learn this trigger as effectively as possible, without decreasing the clean accuracy, which would raise suspicion.
+
+The results also show that the ASR model is unbothered by the trigger: Word Error Rates always vary less than 1\% between poisoning rates, and are always between 10\% and 11\%.
+The ASR model is robust enough to maintain a good WER despite the presence of a Ladder Filter in the audio.
+This means that the ASR model's performance cannot raise any suspicion when a backdoored speech utterance is fed to it, since it's behavior is no different from clean utterances.
+
+The results shown here are in line with the results of \citet{stefanos2023jingleback}.
+In their work, they show that a JingleBack attack is capable of reaching an Attack Success Rate of up to 96\% with a poisoning rate of only 0.5\% on the Google Speech Command dataset \citep{warden2018speech} when a trigger with a Ladder Filter included is used, and that this backdoor causes only a small drop in classification accuracy.
+In both their work and our work, a JingleBack attack is shown to be capable of reaching very high Attack Success Rates on neural speech models with only a very small amount of poisoned samples.
 
 \section{Conclusion}
 
