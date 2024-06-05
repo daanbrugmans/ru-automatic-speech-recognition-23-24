@@ -327,18 +327,27 @@ This means that, from the attacker's perspective, the goal is for the ASV model 
 The baseline ASV model used by \citeauthor{roddeman2024anonymization} is a pre-trained Wav2Vec2 model \citep{baevski2020wav2vec2} from HuggingFace called "Wav2Vec2-Base" \citep{facebook2021huggingface}.
 We first fine-tune an instance of this pre-trained model on a clean train dataset (with no poisoned utterances).
 This model is called the clean model.
-We then calculate and store the speaker identification accuracy and Attack Success Rate of the clean ASV model, alongside the WER of the ASR model on the clean test data.
+We then calculate and store the Speaker Identification Accuracy and Attack Success Rate of the clean ASV model, alongside the WER of the ASR model on the clean test data.
 
 After the clean model has been fine-tuned, we fine-tune a multitude of adversarial models.
 Every adversarial model is trained on a backdoored version of the train dataset with a different poisoning rate.
 We use poisoning rates of 5\%, 10\%, 20\%, 30\%, 40\%, and 50\%.
 In other words, we fine-tune adversarial models to 100 utterances, of which 5, 10, 20, 30, 40, or 50 are backdoored with a JingleBack trigger.
 This results in six backdoored ASV models.
-For every backdoored model, we calculate the speaker identification accuracy, the Attack Success Rate, and the Clean Accuracy Drop.
+For every backdoored model, we calculate the Speaker Identification Accuracy, the Attack Success Rate, and the Clean Accuracy Drop.
 For every poisoning rate, we also calculate the Word Error Rate and Word Error Rate Increase of the clean ASR model.
 
 \subsection{Evasion Attacks}
-\citet{kim2020torchattacks}
+We attack an ASV model that has been fine-tuned on the clean test set used for the backdoor attack.
+We attack this model with both an FGSM \citep{goodfellow2015explaining} and a PGD \citep{madry2018towards} attack.
+For our experiment, we will use $\epsilon = \frac{8}{255}$ for the FGSM model, and $\epsilon = \frac{8}{255}$ and $\alpha = \frac{2}{255}$ for the PGD model.
+We run the PGD model for 10 steps.
+The implementation of the FGSM and PGD attacks is taken from the Torchattacks \citep{kim2020torchattacks} library and is refactored to fit our data.
+
+We use the evasion attacks to generate perturbed utterances with the speaker with ID 0 as the target.
+The perturbations should then move any audio file closer to the space of speaker ID 0 utterances.
+We feed these perturbed inputs to the ASV model, and measure its Speaker Identification Accuracy and Attack Success Rate.
+We also measure the clean ASR model's Word Error Rate on these perturbed inputs.
 
 \section{Results}
 \subsection{Backdoor Attacks}
@@ -359,7 +368,7 @@ Furthermore, the Attack Success Rate continues to increase as the poisoning rate
 This means that 50 examples of speech utterances with a Ladder Filter trigger is enough for the pre-trained Wav2Vec2 model to learn the backdoor perfectly.
 
 The results show that, despite learning the backdoor near-perfectly, the accuracy of the ASV model remains stable.
-With the exception of two outliers, speaker identification accuracy of the ASV model lies in the range of [0.82, 0.93].
+With the exception of two outliers, Speaker Identification Accuracy of the ASV model lies in the range of [0.82, 0.93].
 The results also show a near-constant Word Error Rate, which is in the range of [0.100, 0.107] at any poisoning rate.
 
 
@@ -377,6 +386,9 @@ In their work, they show that a JingleBack attack is capable of reaching an Atta
 In both their work and our work, a JingleBack attack is shown to be capable of reaching very high Attack Success Rates on neural speech models with only a very small amount of poisoned samples.
 
 \section{Conclusion}
+In this paper, we demonstrate how we can attack neural Speech Anonymization pipelines using adversarial attacks.
+We demonstrate that a pipeline that optimizes for lightweight effects-based speaker pseudonymization using neural speech models can be backdoored using a JingleBack attack, where the trigger is also another audio effect, and that such an attack can introduce a near-perfect backdoor into the neural models with as little as five adversarial examples.
+% Zeg ook nog een zin over evasion attacks.
 
 \bibliography{custom}
 
