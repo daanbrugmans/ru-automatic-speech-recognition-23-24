@@ -342,14 +342,17 @@ We attack an ASV model that has been fine-tuned on the clean test set used for t
 We attack this model with both an FGSM \citep{goodfellow2015explaining} and a PGD \citep{madry2018towards} attack.
 For our experiment, we will use $\epsilon = \frac{8}{255}$ for the FGSM model, and $\epsilon = \frac{8}{255}$ and $\alpha = \frac{2}{255}$ for the PGD model.
 We run the PGD model for 10 steps.
-The implementation of the FGSM and PGD attacks is taken from the Torchattacks \citep{kim2020torchattacks} library and is refactored to fit our data.
+The implementation of the FGSM and PGD attacks is taken from the Torchattacks \citep{kim2020torchattacks} library and is refactored to better fit our needs.
 
 We use the evasion attacks to generate perturbed utterances with the speaker with ID 0 as the target.
-The perturbations should then move any audio file closer to the space of speaker ID 0 utterances.
-We feed these perturbed inputs to the ASV model, and measure its Speaker Identification Accuracy and Attack Success Rate.
-We also measure the clean ASR model's Word Error Rate on these perturbed inputs.
+This means that the perturbations caused by the attack should move any utterance closer to the space of utterances by the speaker with ID 0.
+We feed these perturbed inputs into the ASV model, and measure its Speaker Identification Accuracy and Attack Success Rate.
+We also measure the clean ASR model's WER on these perturbed inputs.
 
 \section{Results}
+The backdoored and perturbed utterances computed during the execution of the experiments have been saved as audio files.
+Examples of clean, JingleBack backdoored, FGSM perturbed, and PGD perturbed audio can be found at the following URL: \url{https://github.com/daanbrugmans/ru-automatic-speech-recognition-23-24/tree/main/audio}
+
 \subsection{Backdoor Attacks}
 \begin{figure*}
     \centering

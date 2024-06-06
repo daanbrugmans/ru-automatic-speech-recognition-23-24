@@ -38,7 +38,7 @@ def attack_success_rate(asv_model: SpeakerIdentificationModel, adversarial_test_
                 
     return attack_success_rate, misclassifications
 
-def evasion_attack_success_rate(asv_model: SpeakerIdentificationModel, perturbed_utterances: list, speaker_ids: list, device, target_label: int) -> float:
+def evasion_attack_success_rate(asv_model, perturbed_utterances: list, speaker_ids: list, device, target_label: int) -> float:
     """Calculates and returns the Attack Success Rate of an Evasion Attack for an ASV model.
     
     Taken from the Security & Privacy of Machine Learning course (dr. Picek) and refactored."""
