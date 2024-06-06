@@ -73,7 +73,9 @@
 % \end{figure}
 
 \begin{abstract}
-  
+  We explore potential weak points of a Speaker Anonymization system that uses a lightweight, digital effects-based pseudonymization strategy by adversarially attacking the neural speech models in the system used for evaluating the pseudonymization strategy.
+  We successfully insert a JingleBack backdoor into the system's Automatic Speaker Verification model, reaching an Attack Success Rate of 95\% after providing only 5 backdoored utterances.
+  We also show that the models are sensitive to FGSM and PGD attacks, and that small audio perturbations can lead to a remarkable decrease in model performance.
 \end{abstract}
 
 \section{Introduction}
@@ -105,6 +107,13 @@ For this paper, we attempt to answer the following Research Question:
 
 \section{Related Work}
 \subsection{Neural Speaker Anonymization}
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.9\textwidth]{roddeman_etal_optimization.png}
+  \caption{The optimization process of the lightweight pseudonymization pipeline by \citet{roddeman2024anonymization}.}
+  \label{fig:roddeman_etal_optimization}
+\end{figure*}
+
 \citet{meyer2023anonymizing} showcase a successful realization of neural Speaker Anonymization using GANs.
 Their Speaker Anonymization architecture includes the extraction of embeddings from speech, which are fed into a GAN.
 This GAN first learns to generate embeddings sampled from a normal distribution.
@@ -121,19 +130,19 @@ The perturbations caused by the FGSM attack alter the latent space vector in suc
 When the vector is then fed to the VAE's decoder, the decoder is unable to extract features from the perturbed vector that relate to the original speaker's speech characterizations.
 The resulting decoded speech sample is untraceable to the original speaker and thus anonymous.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.45\textwidth]{kai_etal_pipeline.png}
-  \caption{The lightweight pseudonymization pipeline by \citet{kai2022lightweight} visualized.}
-  \label{fig:kai_etal_pipeline}
-\end{figure}
-
 \citet{kai2022lightweight} showcase a lightweight Speaker Anonymization pipeline.
 Their proposed pipeline pseudonymizes speech by applying voice modifications to the spoken utterances.
 In their pipeline, the authors make use of a neural ASR model alongside an \textit{Automatic Speaker Verification} (ASV) model, which are used for the recognition of words and speakers respectively.
 Instead of optimizing the performance of the ASR and ASV model, the authors attempt to optimize the voice modifications applied to the utterances.
 The optimization is performed by minimizing the \textit{Word Error Rate} (WER) and maximizing the \textit{Equal Error Rate} (EER).
 Figure \ref{fig:kai_etal_pipeline} shows the design of the proposed pipeline.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{kai_etal_pipeline.png}
+  \caption{The lightweight pseudonymization pipeline by \citet{kai2022lightweight} visualized.}
+  \label{fig:kai_etal_pipeline}
+\end{figure}
 
 By refraining from using neural models to anonymize the speech itself, and instead opting to use existing neural models only for evaluation purposes, the pseudonymization of the utterances becomes a relatively cheap operation.
 However, although the method proposed by \citeauthor{kai2022lightweight} is lightweight during inference, it does require that an optimal parameter set for the speech modifications is found first, which is a more resource intensive process.
@@ -142,13 +151,6 @@ It should also be noted that this process produces pseudonymized speech, and not
 \citet{roddeman2024anonymization} expand upon the work by \citet{kai2022lightweight} by proposing their own lightweight speaker pseudonymization optimization pipeline, shown in figure \ref{fig:roddeman_etal_optimization}.
 The authors' aims are to produce a pseudonymization pipeline that is resource efficient, easy to deploy, and optimizes swiftly.
 Their pipeline uses the same optimization strategy used by \citeauthor{kai2022lightweight}: pre-trained ASR and ASV models are used to calculate the WER and EER, which are used to optimize a set of audio modifications for pseudonymization purposes.
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.9\textwidth]{roddeman_etal_optimization.png}
-  \caption{The optimization process of the lightweight pseudonymization pipeline by \citet{roddeman2024anonymization}.}
-  \label{fig:roddeman_etal_optimization}
-\end{figure*}
 
 The authors performed 300 optimization trials, and evaluated their results on samples of utterances spoken by both men and women.
 They found that the most effective modifications for pseudonymization purposes include a time stretch factor, an increase in dB, and applying a low-pass cutoff.
@@ -168,7 +170,7 @@ Evasion attacks are adversarial attacks that are used during model inference.
 The aim of an evasion attack is to perturb an input in such a way that a fully trained model is fooled into behaving differently.
 This behavior should fulfill the attacker's goals.
 
-\citet{goodfellow2015explaining} introduced FGSM, the \textit{Fast Gradient Sign Method}.
+\citet{goodfellow2015explaining} introduce FGSM, the \textit{Fast Gradient Sign Method}.
 FGSM perturbs an input by exploiting a trained model's gradients.
 When given the input $x$ and its label $y$, an FGSM attack calculates the gradient with respect to the input using the model's parameters $\theta$ and loss function $J_\theta(x, y)$.
 The sign of this gradient is calculated and is added on top of the original input by a factor of $\epsilon$.
@@ -193,6 +195,13 @@ Although this makes FGSM attacks cheap to perform, it also makes the attack diff
 The core principle of PGD is that it projects FGSM gradients back to a predefined max perturbation level; if an FGSM's perturbation is too big, PGD projects it back.
 This makes PGD a multiple-step approach.
 
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.9\textwidth]{badnet.png}
+  \caption{An example of a BadNet attack \citep{gu2019badnets}. On the left, an image of a stop sign with varying BadNet backdoors can be seen. On the right, a backdoored network can be seen interpreting a stop sign as a speed limit sign due to the physical backdoor on the sign itself.}
+  \label{fig:badnet}
+\end{figure*}
+
 PGD's projection of an FGSM attack is performed by applying a clipping function $\text{clip}(\cdot)$ on the FGSM attack.
 The clipping function will clip gradients outside the limit of $x + S$, where $x$ is the original input data and $S$ is the predefined maximal Euclidean distance a perturbation is allowed to be from $x$.
 Prior to clipping the FGSM perturbed input $x_t$, PGD will fire another FGSM attack on the model, but will now calculate the gradient with respect to the perturbed input $x_t$ instead of the original input $x$.
@@ -207,13 +216,6 @@ where $x_{t+1}$ is the final result of one round of PGD.
 PGD can be performed for multiple rounds $T$ until $x_T$ is reached. 
 
 \subsubsection{Backdoor Attacks}
-\begin{figure*}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{badnet.png}
-  \caption{An example of a BadNet attack \citep{gu2019badnets}. On the left, an image of a stop sign with varying BadNet backdoors can be seen. On the right, a backdoored network can be seen interpreting a stop sign as a speed limit sign due to the physical backdoor on the sign itself.}
-  \label{fig:badnet}
-\end{figure*}
-
 Backdoor attacks are adversarial attacks that are used during model training.
 They are a subset of \textit{Poisoning Attacks}.
 The aim of a poisoning attack is to alter (a subset of) the training data in order to teach the model certain behavior or to decrease the model's performance.
@@ -346,7 +348,7 @@ The implementation of the FGSM and PGD attacks is taken from the Torchattacks \c
 
 We use the evasion attacks to generate perturbed utterances with the speaker with ID 0 as the target.
 This means that the perturbations caused by the attack should move any utterance closer to the space of utterances by the speaker with ID 0.
-We feed these perturbed inputs into the ASV model, and measure its Speaker Identification Accuracy and Attack Success Rate.
+We feed these perturbed inputs into the ASV model, and measure its Speaker Identification Accuracy.
 We also measure the clean ASR model's WER on these perturbed inputs.
 
 \section{Results}
@@ -374,9 +376,27 @@ The results show that, despite learning the backdoor near-perfectly, the accurac
 With the exception of two outliers, Speaker Identification Accuracy of the ASV model lies in the range of [0.82, 0.93].
 The results also show a near-constant Word Error Rate, which is in the range of [0.100, 0.107] at any poisoning rate.
 
+\subsection{Evasion Attacks}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{c|c|c}
+        & \textbf{Acc} & \textbf{WER} \\
+        \hline
+        \textbf{Clean} & 0.62 & 0.104 \\
+        \textbf{FGSM} & 0.10 & 0.773 \\
+        \textbf{PGD} & 0.10 & 0.763
+    \end{tabular}
+    \caption{Scores of the Speaker Identification Accuracy (Acc) and Word Error Rate (WER) of the clean ASV and ASR models on unaltered/clean utterances, FGSM-perturbed utterances, and PGD-perturbed utterances from the test set.}
+    \label{tab:evasion_metrics}
+\end{table}
+
+The results of the FGSM and PGD attack experiments are shown in table \ref{tab:evasion_metrics}.
+After the utterances from the clean test set have been perturbed by an FGSM or PGD attack, the Speaker Identification Accuracy of the ASV model drops to 10\%.
+Since the ASV model predicts from a pool of ten speakers, its accuracy is now no better than random guesses.
+The ASR model's Word Error Rate has increased from 0.104 to 0.773 on FGSM-perturbed audio and 0.763 on PGD-perturbed audio.
 
 \section{Discussion}
-The results show that a simple JingleBack backdoor can successfully be inserted into \citeauthor{roddeman2024anonymization}'s ASV model using only 5 backdoored speech utterances, and that this number of backdoored utterances is sufficient in making the model misclassify 95\% of all utterances with the JingleBack trigger inserted.
+The results from the Backdoor Attack experiment show that a simple JingleBack backdoor can successfully be inserted into \citeauthor{roddeman2024anonymization}'s ASV model using only 5 backdoored speech utterances, and that this number of backdoored utterances is sufficient in making the model misclassify 95\% of all utterances with the JingleBack trigger inserted.
 The accuracy of the ASV model is not compromised as this backdoor is learned, with the ASV model being able to identify at least 80\% of all speakers correctly when given an utterance without the trigger, which is a higher accuracy than the clean ASV model.
 This combination of a good accuracy and near-perfect Attack Success Rate should fulfill the wishes of an attacker, who aims to exploit model behavior using the trigger, and wants the model to learn this trigger as effectively as possible, without decreasing the clean accuracy, which would raise suspicion.
 
@@ -388,10 +408,17 @@ The results shown here are in line with the results of \citet{stefanos2023jingle
 In their work, they show that a JingleBack attack is capable of reaching an Attack Success Rate of up to 96\% with a poisoning rate of only 0.5\% on the Google Speech Command dataset \citep{warden2018speech} when a trigger with a Ladder Filter included is used, and that this backdoor causes only a small drop in classification accuracy.
 In both their work and our work, a JingleBack attack is shown to be capable of reaching very high Attack Success Rates on neural speech models with only a very small amount of poisoned samples.
 
+The results from the Evasion Attacks experiment show that perturbing the utterances with an FGSM or PGD attack worsens the models' performances staggeringly: the FGSM attack causes the Word Error Rate to increase over sevenfold, and the Speaker Identification Accuracy is no better than purely random guesses.
+Despite its multi-step approach, the PGD attack causes the models to reach similar measures.
+It is likely that the perturbations, despite maximally deviating from the original utterances by a factor only of $\frac{8}{255}$, are too large for the models to handle.
+The size of the perturbations would prevent the generation of perturbed utterances that are still understandable by the models, which prevents an attacker from making the ASV model misclassify to a specific target speaker.
+However, the effects of the perturbations does show that the ASR and ASV models are quite sensitive to perturbed audio, which could be used to an attacker's advantage.
+
 \section{Conclusion}
 In this paper, we demonstrate how we can attack neural Speech Anonymization pipelines using adversarial attacks.
 We demonstrate that a pipeline that optimizes for lightweight effects-based speaker pseudonymization using neural speech models can be backdoored using a JingleBack attack, where the trigger is also another audio effect, and that such an attack can introduce a near-perfect backdoor into the neural models with as little as five adversarial examples.
-% Zeg ook nog een zin over evasion attacks.
+Furthermore, we demonstrate that the neural speech models are sensitive to FGSM-perturbed and PGD-perturbed audio, and that their performance drops remarkably once given utterances affected by an Evasion Attack.
+We conclude that adversarial attacks on Speaker Anonymization systems have the potential to disrupt the anonymization strategy and may prevent proper anonymization from being applied on spoken utterances.
 
 \bibliography{custom}
 
