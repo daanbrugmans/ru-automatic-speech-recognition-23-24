@@ -1,6 +1,3 @@
-from ASR_2024_anonymization_module_learning.speaker_anonymization.spi import SpeakerIdentificationModel
-from ASR_2024_anonymization_module_learning.speaker_anonymization.losses import speaker_verification_loss
-
 import torch
 import torch.nn as nn
 
@@ -12,60 +9,49 @@ class FGSM(EvasionAttack):
     FGSM in the paper 'Explaining and harnessing adversarial examples'
     [https://arxiv.org/abs/1412.6572]
 
-    Distance Measure : Linf
-
-    Arguments:
-        model (nn.Module): model to attack.
-        eps (float): maximum perturbation. (Default: 8/255)
-
-    Shape:
-        - images: :math:`(N, C, H, W)` where `N = number of batches`, `C = number of channels`,        `H = height` and `W = width`. It must have a range [0, 1].
-        - labels: :math:`(N)` where each value :math:`y_i` is :math:`0 \leq y_i \leq` `number of labels`.
-        - output: :math:`(N, C, H, W)`.
-
-    Examples::
-        >>> attack = torchattacks.FGSM(model, eps=8/255)
-        >>> adv_images = attack(images, labels)
-
     Taken from the Torchattacks (https://arxiv.org/abs/2010.01950) library and refactored."""
 
-    def __init__(self, asv_model: SpeakerIdentificationModel, eps=8 / 255):
+    def __init__(self, asv_model, eps=8/255):
         super().__init__("FGSM", asv_model.model)
         self.eps = eps
         self.supported_mode = ["default", "targeted"]
-        self.asv_model = asv_model
+        self.processor = asv_model.processor
+        self.classifier = asv_model.classifier
 
-    def forward(self, utterances, labels):
+    def forward(self, utterance, label):
         r"""
         Overridden.
         """
-
-        utterances = utterances.clone().detach().to(self.device)
-        labels = labels.clone().detach().to(self.device)
-
-        if self.targeted:
-            target_labels = self.get_target_label(utterances, labels)
-
-        # loss = nn.CrossEntropyLoss()
-
-        utterances.requires_grad = True
-        # outputs = self.get_logits(images)
-        outputs = self.asv_model.get_speakers_using_waveforms(utterances)
-
+        
+        torch.cuda.empty_cache()
+        
+        utterance = torch.unsqueeze(utterance, dim=0)
+        utterance = utterance.to(self.device)
+        utterance.requires_grad = True
+        
+        model_input = self.processor(utterance, sampling_rate=16000, return_tensors="pt").data["input_values"]
+        model_input = model_input.squeeze(0).to(self.device)
+        model_input.requires_grad = True
+        
+        model_output = self.model(model_input)
+        model_output = model_output.last_hidden_state.mean(dim=1).to(self.device)
+        model_output = self.classifier(model_output)
+                                
         # Calculate loss
+        loss = nn.BCEWithLogitsLoss()
+        
+        labels = torch.full((1, model_output.size(dim=1)), label, dtype=torch.float32)
+        labels = labels.to(self.device)
+        
         if self.targeted:
-            cost = -speaker_verification_loss(outputs, target_labels)
-            # cost = -loss(outputs, target_labels)
+            cost = -loss(model_output, labels)
         else:
-            cost = speaker_verification_loss(outputs, labels)
-            # cost = loss(outputs, labels)
-
+            cost = loss(model_output, labels)
+                            
         # Update adversarial images
-        grad = torch.autograd.grad(
-            cost, utterances, retain_graph=False, create_graph=False
-        )[0]
+        grad = torch.autograd.grad(cost, model_input, retain_graph=False, create_graph=False)[0]
 
-        adversarial_utterances = utterances + self.eps * grad.sign()
-        adversarial_utterances = torch.clamp(adversarial_utterances, min=0, max=1).detach()
+        adversarial_utterance = utterance + self.eps * grad.sign()
+        adversarial_utterance = torch.clamp(adversarial_utterance, min=0, max=1).detach()
 
-        return adversarial_utterances
+        return adversarial_utterance

@@ -27,17 +27,12 @@ class SpeakerIdentificationModel:
         self.study_name = CONFIG.STUDY_NAME
         self.processor = Wav2Vec2Processor.from_pretrained(CONFIG.SPI_BACKBONE)
         self.model = Wav2Vec2Model.from_pretrained(CONFIG.SPI_BACKBONE).to(device)
-
-        # for param in self.model.parameters():
-        #     param.requires_grad = True
-
         self.classifier = nn.Linear(self.model.config.hidden_size, num_speakers).to(device)
         self.num_speakers = num_speakers
         self.resampler = T.Resample(orig_freq=48000, new_freq=16000)
         print(f"Initialized model with {num_speakers} speakers for fine-tuning.")
 
     def forward(self, input_values):
-        # with torch.no_grad():
         outputs = self.model(input_values.to(device))
         embeddings = outputs.last_hidden_state.mean(dim=1).to(device)
         logits = self.classifier(embeddings)

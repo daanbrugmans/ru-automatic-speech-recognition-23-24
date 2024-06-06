@@ -1,7 +1,7 @@
 from attacks.backdoor_attack import BackdoorAttack
 
 import torch
-from pedalboard import Pedalboard, LadderFilter, Gain, Phaser
+from pedalboard import Pedalboard, LadderFilter
 
 class JingleBack(BackdoorAttack):
     def __init__(self, source_label = int, target_label = int) -> None:

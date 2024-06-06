@@ -38,6 +38,7 @@ class Config:
     CACHE_FOLDER = "d:/Datasets/vctk/cache"#"cache"
     ANONYMIZED_FOLDER = "d:/Datasets/vctk/anonymized_audio"
     BACKDOORED_FOLDER = "d:/Datasets/vctk/backdoored_audio"
+    PERTURBED_FOLDER = "d:/Datasets/vctk/perturbed_audio"
     SHOW_PROGRESS_BAR = False
     CONFIG_N_JOBS = 1  # Number of jobs to run in parallel, -1 means use all
     SEED = 3131

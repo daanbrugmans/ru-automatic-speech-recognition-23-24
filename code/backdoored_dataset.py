@@ -4,12 +4,9 @@ from ASR_2024_anonymization_module_learning.speaker_anonymization.config import 
 
 from attacks.backdoor_attack import BackdoorAttack
 
-import datasets.load
-
 import torchaudio
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-from torch.utils.data import random_split
 
 class BackdooredVCTK(Dataset):
         def __init__(self, backdoor: BackdoorAttack, poisoning_rate: float, train: bool, pipeline_config: Config) -> None:
@@ -88,24 +85,3 @@ class CachedVCTK(Dataset):
     
     def __getitem__(self, index):
         return (self.utterances[index], self.speaker_ids[index], self.transcriptions[index], self.sample_rates[index], self.file_paths[index])
-    
-                
-def get_dataloaders(backdoor: BackdoorAttack = None, train_split=0.8) -> tuple[DataLoader, DataLoader, DataLoader]:
-    """Returns DataLoader objects for a train, validation, and test set of the dataset. If an `Attack` object is passed, it will backdoor the data using the object first."""
-    
-    if backdoor is None:
-        dataset_train_val = datasets.load.load_dataset("vctk", split="train", cache_dir="d:/Datasets/vctk/cache")
-        dataset_test = datasets.load.load_dataset("vctk", split="train", cache_dir="d:/Datasets/vctk/cache")
-    else:
-        dataset_train_val = BackdooredVCTK(backdoor, train=True)
-        dataset_test = BackdooredVCTK(backdoor, train=False)
-    
-    train_size = int(len(dataset_train_val) * train_split)
-    val_size = int(len(dataset_train_val) - train_size)
-    dataset_train, dataset_val = random_split(dataset_train_val, [train_size, val_size])
-    
-    dataloader_train = DataLoader(dataset_train, batch_size=128, shuffle=True)
-    dataloader_val = DataLoader(dataset_val, batch_size=128, shuffle=False)
-    dataloader_test = DataLoader(dataset_test, batch_size=128, shuffle=False)
-    
-    return dataloader_train, dataloader_val, dataloader_test
